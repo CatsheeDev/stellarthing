@@ -89,9 +89,9 @@ public partial class Player : CharacterBody3D {
 		}
 
 		// funni editor stuff
+	    	ThingFafferyFuckeryThingyHehehehe = Model.Rotation;
 		ThingFafferyFuckery.Position = OffsetThingy;
 		ThingFafferyFuckeryThingy = ThingFafferyFuckery.GlobalPosition;
-		ThingFafferyFuckeryThingyHehehehe = Model.Rotation;
 
 		// // thy onslaughter (removing items)
 		// instruction ??= GetNode<Label>("/root/hud/instruction_notcraft");
