@@ -1,6 +1,5 @@
-﻿using Newtonsoft.Json;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace starry;
 
@@ -8,19 +7,20 @@ namespace starry;
 /// main static class for the engine, recommended to be statically imported, as in <c>using static Starry;</c>
 /// </summary>
 public static class Starry {
-    static StarrySettings settings;
+    /// <summary>
+    /// settings for the engine
+    /// </summary>
+    public static StarrySettings settings { get; set; }
 
     /// <summary>
     /// starts up the engine :D, see StarrySettings for more
     /// </summary>
-    public static void start(StarrySettings settings)
+    public static void create(StarrySettings settings)
     {
         Starry.settings = settings;
 
         log("Starting engine...");
-
-        // test stuff
-        log(settings);
+        Application.create();
     }
 
     /// <summary>
@@ -39,6 +39,44 @@ public static class Starry {
     // if true, the game is currently in debug mode
     public static bool isDebug()
     {
-        return System.Diagnostics.Debugger.IsAttached;
+        #if DEBUG
+        return true;
+        #else
+        return false;
+        #endif
     }
+
+    /// <summary>
+    /// shortcut for new Vector3()
+    /// </summary>
+    public static Vector3 vec3(double x, double y, double z) => new(x, y, z);
+    /// <summary>
+    /// shortcut for new Vector2()
+    /// </summary>
+    public static Vector2 vec2(double x, double y) => new(x, y);
+    /// <summary>
+    /// shortcut for new Vector3i()
+    /// </summary>
+    public static Vector3i vec3i(int x, int y, int z) => new(x, y, z);
+    /// <summary>
+    /// shortcut for new Vector2i()
+    /// </summary>
+    public static Vector2i vec2i(int x, int y) => new(x, y);
+
+    /// <summary>
+    /// shortcut for Vector3.zero
+    /// </summary>
+    public static Vector3 vec3() => Vector3.zero;
+    /// <summary>
+    /// shortcut for Vector2.zero
+    /// </summary>
+    public static Vector2 vec2() => Vector2.zero;
+    /// <summary>
+    /// shortcut for Vector3i.zero
+    /// </summary>
+    public static Vector3i vec3i() => Vector3i.zero;
+    /// <summary>
+    /// shortcut for Vector2i.zero
+    /// </summary>
+    public static Vector2i vec2i() => Vector2i.zero;
 }
