@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace starry;
 
@@ -37,10 +39,6 @@ public static class Starry {
     // if true, the game is currently in debug mode
     public static bool isDebug()
     {
-        bool r = false;
-        #if DEBUG
-        r = true;
-        #endif
-        return r;
+        return System.Diagnostics.Debugger.IsAttached;
     }
 }
