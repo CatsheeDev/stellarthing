@@ -1,62 +1,55 @@
-using Silk.NET.GLFW;
+using System;
+using Raylib_cs;
 using static starry.Starry;
 
 namespace starry;
 
-public static class Application {
-    public static Vector2i screenSize { get; private set; } = vec2i();
-    static Glfw? glfw;
+/// <summary>
+/// manages the lifecycle of the game
+/// </summary>
+public static partial class Application {
+    /// <summary>
+    /// current delta time
+    /// </summary>
+    public static double delta { get; set; } = 0;
+    static double prevtime;
+
+    public static event EventHandler? onClose;
 
     public unsafe static void create()
     {
-        // init stuff
-        glfw = Glfw.GetApi();
-        if (!glfw.Init()) {
-            log("Fatal error: couldn't start GLFW");
-            return;
-        }
+        // setup stuff
+        Raylib.InitWindow(1280, 720, "Hello World");
+        Raylib.SetWindowState(ConfigFlags.FullscreenMode);
+        #if DEBUG
+        Raylib.SetExitKey(KeyboardKey.F8);
+        #else
+        Raylib.SetExitKey(KeyboardKey.Null);
+        #endif
 
-        // get screen width and height and stuff
-        Monitor* monitor = glfw.GetPrimaryMonitor();
-        if (monitor == null) {
-            log("Fatal error: couldn't get primary monitor");
-            glfw.Terminate();
-            return;
-        }
+        prevtime = getTime();
 
-        VideoMode* mode = glfw.GetVideoMode(monitor);
-        if (mode == null) {
-            log("Fatal error: couldn't get video mode");
-            glfw.Terminate();
-            return;
-        }
-
-        // hints and stuff
-        glfw.WindowHint(WindowHintInt.ContextVersionMajor, 3);
-        glfw.WindowHint(WindowHintInt.ContextVersionMinor, 3);
-        glfw.WindowHint(WindowHintInt.RefreshRate, 60);
-        
-        // make window!!!!!!1
-        WindowHandle* window = glfw.CreateWindow(mode->Width, mode->Height, settings.gameName, monitor, null);
-        if (window == null) {
-            log("Fatal error: couldn't create window");
-            glfw.Terminate();
-            return;
-        }
-        glfw.MakeContextCurrent(window);
+        // this is where the game starts running
+        settings.startup();
 
         // main loop
-        while (!glfw.WindowShouldClose(window)) {
-            glfw.PollEvents();
+        while (!Raylib.WindowShouldClose()) {
+            // get delta time :D
+            double delta = getTime() - prevtime;
+            prevtime = getTime();
 
-            // rendering goes here
+            // render stuff and update entities since that's when entities render stuff
+            Raylib.BeginDrawing();
+            Raylib.ClearBackground(Color.Black);
 
-            glfw.SwapBuffers(window);
+            Raylib.DrawText("hi mom", 12, 12, 20, Color.White);
+            World.updateEntities();
+
+            Raylib.EndDrawing();
         }
 
-        // exit
-        glfw.DestroyWindow(window);
-        glfw.Terminate();
-        return;
+        // clean up and close and stuff
+        onClose?.Invoke(typeof(Application), EventArgs.Empty);
+        Raylib.CloseWindow();
     }
 }
