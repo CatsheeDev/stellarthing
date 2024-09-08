@@ -1,26 +1,82 @@
 ﻿using ImGuiNET;
-using ClickableTransparentOverlay;
-using System.Numerics; 
+using Silk.NET.GLFW;
+using Silk.NET.Input;
+using Silk.NET.OpenGL;
+using Silk.NET.OpenGL.Extensions.ImGui;
+using Silk.NET.SDL;
+using Silk.NET.Windowing;
+using System;
+using System.Numerics;
+using Vortice.Mathematics;
 
-namespace Starry.Editor;
-
-public class Program : Overlay
+unsafe class Program
 {
-    bool check = false;
-    int fuckoff = 0;
-    string bbbbbbb = string.Empty; 
+    private static Glfw glfw;
+    private static GL? _gl = null;
+    private static IInputContext? _input;
+    private static float _delta;
+    private static IWindow? _window;
 
-    protected override void Render()
+    private static ImGuiController imguiController;
+
+    private static ImGuiIOPtr IO;
+
+    static void Main(string[] args)
     {
-        ImGui.Begin("Starry Editor");
-        ImGui.Text("i hate you"); 
+        _window = Silk.NET.Windowing.Window.Create(WindowOptions.Default with
+        {
+            Title = "Starry Editor",
+            UpdatesPerSecond = 60,
+            WindowState = WindowState.Maximized,
+        });
+
+        _window.Load += () =>
+        {
+            imguiController = new ImGuiController(
+                _gl = _window.CreateOpenGL(),
+                _window,
+                _input = _window.CreateInput()
+            );
+
+            IO = ImGui.GetIO();
+            IO.ConfigFlags |= ImGuiConfigFlags.NavEnableKeyboard | ImGuiConfigFlags.ViewportsEnable | ImGuiConfigFlags.DpiEnableScaleViewports | ImGuiConfigFlags.DockingEnable;
+        };
+
+        _window.FramebufferResize += s =>
+        {
+            _gl.Viewport(s);
+        };
+
+        _window.Render += (dt) =>
+        {
+            _delta = (float)dt;
+            imguiController?.Update(_delta);
+
+            _gl?.ClearColor(0, 0, 0, 0);
+            _gl?.Clear((uint)ClearBufferMask.ColorBufferBit);
+
+            OnUpdate();
+            imguiController?.Render();
+        };
+
+        _window.Closing += () =>
+        {
+            imguiController?.Dispose();
+        };
+
+        _window.Run();
     }
 
-    public static void Main(string[] args)
+    protected static void OnUpdate()
     {
-        Console.WriteLine("Starting Editor"); 
-        Program editor = new Program();
+        ImGui.Begin("Window A");
+        ImGui.Text("This is Window A");
+        ImGui.End();
 
-        editor.Start().Wait();
+        ImGui.Begin("Window B");
+        ImGui.Text("This is Window B");
+        ImGui.End();
+
+        imguiController?.Render();
     }
 }
