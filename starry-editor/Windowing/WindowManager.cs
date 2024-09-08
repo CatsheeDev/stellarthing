@@ -1,61 +1,78 @@
 ﻿using ImGuiNET;
+using Silk.NET.Input;
+using Silk.NET.OpenGL;
+using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StarryEditor.Windowing
 {
     public class WindowManager
     {
-        private static IWindow? _window;
+        //fuck off c#
+#pragma warning disable CS8618
+        private IWindow MainWindow;
+        private ImGuiController MainUIController;
+        private IInputContext UIInput;
 
-        public static void CreateWindow()
+        private GL OpenGL;
+        private ImGuiIOPtr IO;
+#pragma warning restore CS8618
+
+        /// <summary>
+        /// INTERNAL USE ONLY!!!! Use Time.DeltaTime
+        /// </summary>
+        public float DeltaTime; 
+
+        public void CreateWindow()
         {
-            _window = Silk.NET.Windowing.Window.Create(WindowOptions.Default with
+            MainWindow = Window.Create(WindowOptions.Default with
             {
                 Title = "Starry Editor",
                 UpdatesPerSecond = 60,
                 WindowState = WindowState.Maximized,
             });
 
-            _window.Load += () =>
+            MainWindow.Load += () =>
             {
-                imguiController = new ImGuiController(
-                    _gl = _window.CreateOpenGL(),
-                    _window,
-                    _input = _window.CreateInput()
+                MainUIController = new ImGuiController(
+                    OpenGL = MainWindow.CreateOpenGL(),
+                    MainWindow,
+                    UIInput = MainWindow.CreateInput()
                 );
 
                 IO = ImGui.GetIO();
                 IO.ConfigFlags |= ImGuiConfigFlags.NavEnableKeyboard | ImGuiConfigFlags.ViewportsEnable | ImGuiConfigFlags.DpiEnableScaleViewports | ImGuiConfigFlags.DockingEnable;
             };
 
-            _window.FramebufferResize += s =>
+            MainWindow.FramebufferResize += s =>
             {
-                _gl.Viewport(s);
+                OpenGL.Viewport(s);
             };
 
-            _window.Render += (dt) =>
+            MainWindow.Render += (dt) =>
             {
-                _delta = (float)dt;
-                imguiController?.Update(_delta);
+                DeltaTime = (float)dt;
+                MainUIController?.Update(DeltaTime);
 
-                _gl?.ClearColor(0, 0, 0, 0);
-                _gl?.Clear((uint)ClearBufferMask.ColorBufferBit);
+                OpenGL?.ClearColor(0, 0, 0, 0);
+                OpenGL?.Clear((uint)ClearBufferMask.ColorBufferBit);
 
-                OnUpdate();
-                imguiController?.Render();
+                UpdateWindows();
+                MainUIController?.Render();
             };
 
-            _window.Closing += () =>
+            MainWindow.Closing += () =>
             {
-                imguiController?.Dispose();
+                MainUIController?.Dispose();
             };
 
-            _window.Run();
+            MainWindow.Run();
+        }
+
+        private void UpdateWindows()
+        {
+            //note to self do magic shit later yawn 
+            MainUIController.Render();
         }
     }
 }
